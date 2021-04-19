@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const validatior = require('validator')
+const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const Task = require('./task')
@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema(
             trim: true,
             lowercase: true,
             validate(value)  {
-                if (!validatior.isEmail(value)) {
+                if (!validator.isEmail(value)) {
                     throw new Error('Invalid email!')
                 }
             }
@@ -45,6 +45,10 @@ const userSchema = new mongoose.Schema(
             }
         },
 
+        avatar: {
+            type: Buffer
+        },
+
         tokens: [{
             token: {
                 type: String,
@@ -69,6 +73,7 @@ userSchema.methods.toJSON = function () {
 
     delete userObject.password
     delete userObject.tokens
+    delete userObject.avatar
 
     return userObject
 }
@@ -83,7 +88,7 @@ userSchema.methods.generateAuthToken = async function () {
     return token
 }
 
-userSchema.statics.findByCredentials = async (eamil, password) => {
+userSchema.statics.findByCredentials = async (email, password) => {
     const user = await User.findOne({ email })
 
     if (!user) {

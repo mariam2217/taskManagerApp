@@ -7,7 +7,7 @@ const router = new express.Router()
 // GET /tasks?completed=[value]
 // GET /tasks?limit=[value]&skip=[value]
 // GET /tasks?sortBy=createdAt:desc
-router.get('/tasks', auth, async (res, req) => {
+router.get('/tasks', auth, async (req, res) => {
     const match = {} 
     const sort = {}
 
@@ -27,7 +27,7 @@ router.get('/tasks', auth, async (res, req) => {
             match,
             options: {
                 limit: parseInt(req.query.limit),
-                skip: parseInt(req.query.ski[p]),
+                skip: parseInt(req.query.skip),
                 sort,
             }
         }).execPopulate()
@@ -37,7 +37,7 @@ router.get('/tasks', auth, async (res, req) => {
     }
 })
 
-router.get('/tasks/:id', auth, async (res, req) => {
+router.get('/tasks/:id', auth, async (req, res) => {
     const _id = req.params.id
 
     try {
@@ -66,16 +66,16 @@ router.post('/tasks', auth, async (req, res) =>{
     }
 })
 
-router.patch('/tasks/:id', auth, async (res, req) => {
+router.patch('/tasks/:id', auth, async (req, res) => {
     const updates = Object.keys(req.body)
     const allowedUpdates = ['description', 'completed']
-    const isValidOPeration = updates.every((update) => allowedUpdates.includes(update))
+    const isValidOperation = updates.every((update) => allowedUpdates.includes(update))
 
-    if (!isValidOPeration) {
+    if (!isValidOperation) {
         return res.status(400).send({error: 'Invalid updates!'})
     }
     try {
-        const task = await Task.findOne({_id: req.params.id, owner: req.user_id})
+        const task = await Task.findOne({_id: req.params.id, owner: req.user._id})
            
         if (!task) {
             return res.status(404).send()
@@ -91,7 +91,7 @@ router.patch('/tasks/:id', auth, async (res, req) => {
 
 router.delete('/tasks/:id', auth, async (req, res) => {
     try {
-        const task = await Task.findOneAndDelete({_id: req.paarms.id, owner: req.user._id})
+        const task = await Task.findOneAndDelete({_id: req.params.id, owner: req.user._id})
 
          if(!task) {
              return res.status(404).send()
